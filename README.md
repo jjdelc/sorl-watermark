@@ -86,7 +86,13 @@ The following settings are available
 
 * THUMBNAIL\_WATERMARK\_OPACITY
   An integer from 0 to 1, specifying the opacity of the watermark.  
-  Default is 0 (opaque).
+  Default is 1 (opaque).
+
+* THUMBNAIL_WATERMARK_MIN_APPLICABLE_SIZE
+  A tuple to indicate what is the minimun geometry to apply the watermark. It is only considered if THUMBNAIL_WATERMARK_ALWAYS is set to `True`. 
+  The geometry vs THUMBNAIL_WATERMARK_MIN_APPLICABLE_SIZE will be compared using
+  tuple's `>=`.
+  Default is set to (0, 0)
 
 * THUMBNAIL\_WATERMARK\_POSITION  
   Specifies the position of the watermark. You can either pass this a gravity

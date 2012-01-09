@@ -15,20 +15,36 @@ THUMBNAIL_WATERMARK_OPACITY = getattr(settings, 'THUMBNAIL_WATERMARK_OPACITY',
 assert 0 <= THUMBNAIL_WATERMARK_OPACITY <= 1 # TODO: raise a ValueError here?
 
 THUMBNAIL_WATERMARK_SIZE = getattr(settings, 'THUMBNAIL_WATERMARK_SIZE', False)
+THUMBNAIL_WATERMARK_MIN_APPLICABLE_SIZE = getattr(settings,
+    'THUMBNAIL_WATERMARK_MIN_APPLICABLE_SIZE', (0, 0))
 
 
 class WatermarkEngineBase(ThumbnailEngineBase):
     """
     Extend sorl.thumbnail base engine to support watermarks.
+
+    Rules to apply watermar:
+     -  If `no_watermark` is set, don't do anything.
+     -  If THUMBNAIL_WATERMARK_ALWAYS, then check if geometry is bigger
+        than THUMBNAIL_WATERMARK_MIN_APPLICABLE_SIZE (using typle __gte__)
+        and if geometry applies, then apply watermark (if
+        THUMBNAIL_WATERMARK_MIN_APPLICABLE_SIZE is not set in settings, it
+        will default to (0, 0) so it will always apply.
+     -  If THUMBNAIL_WATERMARK_ALWAYS is False, then check if watermark
+        options have been manually set on the {% thumbnail %} templatetag
+        if so, then apply the watermark with such options.
     """
     def create(self, image, geometry, options):
         image = super(WatermarkEngineBase, self).create(image, geometry,
                                                         options)
-        if (THUMBNAIL_WATERMARK_ALWAYS or
+        dont_apply = 'no_watermark' in options
+        if not dont_apply and (
+                (THUMBNAIL_WATERMARK_ALWAYS and
+                geometry >= THUMBNAIL_WATERMARK_MIN_APPLICABLE_SIZE) or (
                 'watermark'       in options or
                 'watermark_pos'   in options or
                 'watermark_size'  in options or
-                'watermark_alpha' in options):
+                'watermark_alpha' in options)):
             image = self.watermark(image, options)
         return image
 
